@@ -11,10 +11,8 @@ setup(
     description="Advanced drone control and mission planning library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/droneops/droneops",
+    url="https://github.com/rafonsomartins/droneops",
     project_urls={
-        "Bug Tracker": "https://github.com/droneops/droneops/issues",
-        "Documentation": "https://droneops.readthedocs.io/",
         "Source": "https://github.com/rafonsomartins/droneops",
     },
     classifiers=[
