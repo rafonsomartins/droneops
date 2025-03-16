@@ -15,6 +15,7 @@ setup(
     project_urls={
         "Bug Tracker": "https://github.com/droneops/droneops/issues",
         "Documentation": "https://droneops.readthedocs.io/",
+        "Source": "https://github.com/rafonsomartins/droneops",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -29,6 +30,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: GIS",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     packages=find_packages(),
     python_requires=">=3.7",
@@ -42,9 +44,18 @@ setup(
         "kml": ["fastkml>=0.11"],
         "dev": [
             "pytest>=6.0.0",
-            "black>=21.5b2",
-            "flake8>=3.9.2",
-            "sphinx>=4.0.2",
+            "pytest-cov>=2.0.0",
+            "black>=21.0.0",
+            "flake8>=3.9.0",
+            "sphinx>=4.0.0",
+            "sphinx-rtd-theme>=0.5.0",
+        ],
+    },
+    include_package_data=True,
+    zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'droneops=droneops.cli:main',
         ],
     },
 )
