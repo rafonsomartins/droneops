@@ -454,7 +454,7 @@ class DroneOps:
 	
 	def find_best_landing_spot(self, lidar_log_file):
 		"""
-		Analyze LiDAR data to find the best landing spot.
+		Analyze LiDAR data to find the flattest landing spot with minimal inclination.
 		
 		Args:
 			lidar_log_file (str): Path to LiDAR log file
@@ -462,42 +462,62 @@ class DroneOps:
 		Returns:
 			tuple: (latitude, longitude, altitude) of best spot, or None if not found
 		"""
-		best_spot = None
-		min_variation = float('inf')
-
+		# First, load all valid readings into a dictionary for quick lookup
+		readings = {}
 		try:
 			with open(lidar_log_file, 'r') as file:
 				next(file)  # Skip header
 				for line in file:
 					try:
 						lat, lon, alt, lidar_distance = line.strip().split(',')
-						
-						# Skip entries with no data
-						if lidar_distance == "No data":
-							continue
-							
-						lidar_distance = float(lidar_distance)
-						
-						# Using variation as a measure of flatness
-						# Ideal distance would be around 1-2 meters (adjustable)
-						# Lower variation means flatter surface
-						variation = abs(lidar_distance - 1.5)
-						
-						if variation < min_variation and 0.5 < lidar_distance < 5.0:
-							min_variation = variation
-							best_spot = (float(lat), float(lon), float(alt))
+						if lidar_distance != "No data":
+							lat, lon = float(lat), float(lon)
+							readings[(lat, lon)] = (float(alt), float(lidar_distance))
 					except ValueError:
 						continue
-		except Exception as e:
-			print(f"Error reading LiDAR data: {e}")
-			return None
 
-		if best_spot:
-			print(f"Best landing spot found at: {best_spot}")
-		else:
-			print("No suitable landing spot found from LiDAR data")
+			# Find the spot with minimum inclination
+			best_spot = None
+			min_inclination = float('inf')
 			
-		return best_spot
+			for (lat, lon), (alt, distance) in readings.items():
+				# Get readings from neighboring points (using small delta)
+				delta = 0.00001  # Approximately 1m at equator
+				neighbors = [
+					readings.get((lat + delta, lon)),
+					readings.get((lat - delta, lon)),
+					readings.get((lat, lon + delta)),
+					readings.get((lat, lon - delta))
+				]
+				
+				# Calculate inclination as max height difference with neighbors
+				max_inclination = 0
+				valid_neighbors = 0
+				
+				for neighbor in neighbors:
+					if neighbor is not None:
+						neighbor_alt = neighbor[0] - neighbor[1]  # True ground height
+						current_alt = alt - distance  # True ground height
+						inclination = abs(neighbor_alt - current_alt)
+						max_inclination = max(max_inclination, inclination)
+						valid_neighbors += 1
+				
+				# Only consider points with at least 3 valid neighbors
+				if valid_neighbors >= 3:
+					if max_inclination < min_inclination:
+						min_inclination = max_inclination
+						best_spot = (lat, lon, alt)
+
+			if best_spot:
+				print(f"Best landing spot found at: {best_spot} with inclination: {min_inclination:.2f}m")
+			else:
+				print("No suitable landing spot found from LiDAR data")
+				
+			return best_spot
+				
+		except Exception as e:
+			print(f"Error analyzing LiDAR data: {e}")
+			return None
 	
 	def load_base_coordinates(self):
 		"""
