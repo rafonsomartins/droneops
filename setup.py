@@ -6,8 +6,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="droneops",
     version="0.1.0",
-    author="Drone Operations Team",
-    author_email="droneops@example.com",
+    author="Rui Afonso Martins",
+    author_email="martins.ruiafonso@gmail.com",
     description="Advanced drone control and mission planning library",
     long_description=long_description,
     long_description_content_type="text/markdown",
